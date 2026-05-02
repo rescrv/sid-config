@@ -1,0 +1,62 @@
+#!/bin/sh
+set -eu
+
+# This is a tool wrapper that implements the sid tool protocol.
+# It exports environment variables and delegates to sid-editor-tool.
+
+lookup() {
+    # Look up a variable in the environment, set by sid
+    printenv "$1"
+}
+
+# RCVAR_ARGV0 is set by sid's tool runtime to create a unique prefix
+# for tool-specific environment variables
+PREFIX=${RCVAR_ARGV0:?missing RCVAR_ARGV0}
+
+case "${1:-}" in
+rcvar)
+    # Advertise which environment variables this tool needs from sid
+    printf '%s\n' \
+        "${PREFIX}_REQUEST_FILE" \
+        "${PREFIX}_RESULT_FILE" \
+        "${PREFIX}_SCRATCH_DIR" \
+        "${PREFIX}_TEMP_DIR" \
+        "${PREFIX}_TMPDIR" \
+        "${PREFIX}_WORKSPACE_ROOT" \
+        "${PREFIX}_SESSION_ID" \
+        "${PREFIX}_SESSION_DIR" \
+        "${PREFIX}_AGENT_ID" \
+        "${PREFIX}_TOOL_ID" \
+        "${PREFIX}_TOOL_NAME" \
+        "${PREFIX}_TOOL_PROTOCOL" \
+        "${PREFIX}_RC_CONF_PATH" \
+        "${PREFIX}_RC_D_PATH"
+    ;;
+confirm|run)
+    # confirm: Show a preview of the operation (for manual approval)
+    # run: Execute the operation and write result
+    MODE="$1"
+    shift
+    # Export all required variables in the sid tool protocol format
+    export REQUEST_FILE="$(lookup "${PREFIX}_REQUEST_FILE")"
+    export RESULT_FILE="$(lookup "${PREFIX}_RESULT_FILE")"
+    export SCRATCH_DIR="$(lookup "${PREFIX}_SCRATCH_DIR")"
+    export TEMP_DIR="$(lookup "${PREFIX}_TEMP_DIR")"
+    export TMPDIR="$(lookup "${PREFIX}_TMPDIR")"
+    export WORKSPACE_ROOT="$(lookup "${PREFIX}_WORKSPACE_ROOT")"
+    export SESSION_ID="$(lookup "${PREFIX}_SESSION_ID")"
+    export SESSION_DIR="$(lookup "${PREFIX}_SESSION_DIR")"
+    export AGENT_ID="$(lookup "${PREFIX}_AGENT_ID")"
+    export TOOL_ID="$(lookup "${PREFIX}_TOOL_ID")"
+    export TOOL_NAME="$(lookup "${PREFIX}_TOOL_NAME")"
+    export TOOL_PROTOCOL="$(lookup "${PREFIX}_TOOL_PROTOCOL")"
+    export RC_CONF_PATH="$(lookup "${PREFIX}_RC_CONF_PATH")"
+    export RC_D_PATH="$(lookup "${PREFIX}_RC_D_PATH")"
+    # Delegate to the Rust implementation
+    exec sid-editor-tool "$MODE" "$@"
+    ;;
+*)
+    echo "usage: $0 [rcvar|confirm|run]" >&2
+    exit 129
+    ;;
+esac
