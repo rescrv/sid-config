@@ -12,7 +12,7 @@ Do not blow context on huge files.  Use `rg` to find symbols and callsites, then
 
 Always know the size of a file before reading, cat'ing, or otherwise accessing a file.
 
-For the user's comfort prefer tools that explicitly say they are read-only.  These generally require no confirmation.
+For the user's comfort select tools that explicitly say they are read-only unless you need `str_replace_edit_tool` or `bash`.  The former require no confirmation.
 
 Use `rg` precisely:
 - Find a symbol or callsite with line numbers: `rg -n 'confirm_manual' src/`
