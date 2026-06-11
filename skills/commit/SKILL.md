@@ -124,5 +124,13 @@ Avoid passing one long string with newlines as it breaks your commit messages.  
 for message flag multiple times:
 
 ```
-git commit -m 'feat: Teach Git to Claude' -m "First line." -m "Second line."
+git commit -m 'feat: Teach Git to Claude' -m "First paragraph." -m "Second paragraph."
 ```
+
+When writing commit messages with `git commit -m`, hard-wrap body text at 72 characters.  Each `-m`
+flag produces a paragraph, but git does not wrap the text within a paragraph.  You must insert
+literal newlines in the paragraphs yourself.  Do not put newlines between arguments.
+
+## Literal Instructions
+
+Avoid running commands other than git.
